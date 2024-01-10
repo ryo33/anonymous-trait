@@ -1,6 +1,6 @@
 [package]
 name = "anonymous-trait"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Yes, it captures the environment!"
 categories = ["rust-patterns"]
@@ -19,3 +19,4 @@ syn = { version = "2", features = ["full"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
+tokio = { version = "1", features = ["macros", "rt"] }

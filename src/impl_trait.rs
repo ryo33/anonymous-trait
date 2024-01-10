@@ -1,5 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::parse_quote;
 
 use crate::{attr_syntax::LetDefault, impl_syntax::AnonymousImpl};
 
@@ -21,9 +22,9 @@ pub(crate) fn generate(attr: &LetDefault, mock: &AnonymousImpl) -> TokenStream {
         }
     });
     let methods = mock.methods().map(|method| {
+        let mut method = method.clone();
         let method_ident = &method.sig.ident;
-        let receiver = method.sig.receiver();
-        let args = method
+        let arg_pats = method
             .sig
             .inputs
             .iter()
@@ -31,16 +32,16 @@ pub(crate) fn generate(attr: &LetDefault, mock: &AnonymousImpl) -> TokenStream {
                 let syn::FnArg::Typed(pat_type) = arg else {
                     return None;
                 };
-                Some(pat_type)
+                Some(&pat_type.pat)
             })
             .collect::<Vec<_>>();
-        let arg_pats = args.iter().map(|arg| &arg.pat);
-        let output = &method.sig.output;
-        quote! {
-            fn #method_ident(#receiver #(,#args)*) #output {
+        method.block.stmts = vec![syn::Stmt::Expr(
+            parse_quote! {
                 self.#method_ident.lock().unwrap()(self.__anonymous_trait_state #(,#arg_pats)*)
-            }
-        }
+            },
+            None,
+        )];
+        method
     });
     quote! {
         #[allow(non_camel_case_types)]
@@ -58,6 +59,7 @@ mod tests {
     use syn::parse_quote;
 
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn empty() {
@@ -184,5 +186,32 @@ mod tests {
             }
         };
         assert_eq!(actual.to_string(), expected.to_string())
+    }
+
+    #[test]
+    fn async_fn() {
+        let attr = parse_quote! {
+            let my_mock = Cat
+        };
+        let input = parse_quote! {
+            impl Something for Cat {
+                async fn meow(&self) -> String {
+                    "meow".to_string()
+                }
+            }
+        };
+        let actual = generate(&attr, &input);
+        let expected = quote! {
+            #[allow(non_camel_case_types)]
+            impl <
+                '__anonymous_trait_state,
+                meow: FnMut(&Cat) -> String + Send,
+            > Something for my_mock__Something<'__anonymous_trait_state, meow> {
+                async fn meow(&self) -> String {
+                    self.meow.lock().unwrap()(self.__anonymous_trait_state)
+                }
+            }
+        };
+        assert_eq!(actual.to_string(), expected.to_string());
     }
 }

@@ -3,6 +3,10 @@ use quote::quote;
 
 pub(crate) fn generate(target: &syn::Type, input: &syn::ImplItemFn) -> TokenStream {
     let mut args = vec![];
+    let bound = input
+        .sig
+        .asyncness
+        .map_or_else(|| quote! {}, |_| quote! { + Send });
     if let Some(receiver) = input.sig.receiver() {
         let reference = receiver
             .reference
@@ -42,7 +46,7 @@ pub(crate) fn generate(target: &syn::Type, input: &syn::ImplItemFn) -> TokenStre
         }
     };
     quote! {
-        FnMut(#(#args),*) #output
+        FnMut(#(#args),*) #output #bound
     }
 }
 
