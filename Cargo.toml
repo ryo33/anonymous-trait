@@ -1,6 +1,6 @@
 [package]
 name = "anonymous-trait"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Anonymous trait implementation with capturing the environment"
 categories = ["rust-patterns"]
