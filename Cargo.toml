@@ -2,7 +2,7 @@
 name = "anonymous-trait"
 version = "0.1.1"
 edition = "2021"
-description = "Yes, it captures the environment!"
+description = "Anonymous trait implementation with capturing the environment"
 categories = ["rust-patterns"]
 keywords = ["anonymous", "closure"]
 license = "MIT OR Apache-2.0"
@@ -20,3 +20,4 @@ syn = { version = "2", features = ["full"] }
 [dev-dependencies]
 pretty_assertions = "1.4.0"
 tokio = { version = "1", features = ["macros", "rt"] }
+mockall = "0.12"

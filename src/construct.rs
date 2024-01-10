@@ -4,6 +4,7 @@ use quote::{format_ident, quote};
 use crate::{attr_syntax::LetDefault, impl_syntax::AnonymousImpl};
 
 pub(crate) fn generate(attr: &LetDefault, input: &AnonymousImpl) -> TokenStream {
+    let let_token = &attr.let_token;
     let pat_ident = &attr.pat_ident;
     let default = &attr.expr;
     let target = input.target();
@@ -27,7 +28,7 @@ pub(crate) fn generate(attr: &LetDefault, input: &AnonymousImpl) -> TokenStream 
     quote! {
         let mut #state_ident = #default;
         #(#let_closures)*
-        let #pat_ident = #ident {
+        #let_token #pat_ident = #ident {
             #state_ident: &mut #state_ident,
             #(#closures)*
         };
