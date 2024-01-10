@@ -5,14 +5,13 @@ Anonymous trait implementation with capturing the environment
 ## Example
 
 ```rust
-#[mockall::automock]
 trait Cat {
     fn meow(&self) -> String;
     fn set_name(&mut self, new: String);
     async fn meow_async(&self) -> String;
 }
 
-#[tokio::main(flavor = "current_thread")]
+#[tokio::main]
 async fn main() {
     let name = "mock";
 

@@ -1,4 +1,3 @@
-#[mockall::automock]
 trait Cat {
     fn meow(&self) -> String;
     fn set_name(&mut self, new: String);
